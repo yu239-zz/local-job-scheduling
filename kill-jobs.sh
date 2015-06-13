@@ -1,6 +1,6 @@
 #!/bin/bash
 
-(($# < 1)) && echo "usage: ./kill-jobs.sh <io-dir> [<dummy>]" && exit
+(($# < 1)) && echo "usage: ./kill-jobs.sh <io-dir> [rm]" && exit
 
 io_dir=`realpath $1`
 
@@ -14,4 +14,4 @@ for pid in `cat ${io_dir}/pids`; do
     pkill -TERM -P $pid            # this also kills the children
 done
 
-(($# >= 2)) && rm -rf $io_dir
+(($# >= 2)) && [ "$2" == "rm" ] && rm -rf $io_dir
