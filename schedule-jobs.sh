@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# example: ./schedule-jobs.sh ~/dtBOW/dtBOW.py ~/YouTubeClips/videos.txt 5 dtBOW-io
+
 (($# < 4)) && echo "usage: ./schedule-jobs.sh <job-script> <files-list> <n-workers> <io-dir>" && exit
 
 rm -rf $4; mkdir -p $4
@@ -22,9 +24,12 @@ script=$(basename "$job_script")
 for file in `ls $io_dir/*`; do
     echo "#!/bin/bash" > $file.sh
     # there might be some data dependency on the relative path of script
-    echo "cd $running_dir; ./$script $file 2>&1 | tee $file.output" >> $file.sh
+    echo "cd $running_dir; nice -n 19 ./$script $file 2>&1 | tee $file.output" >> $file.sh
     chmod 755 $file.sh
     nohup bash $file.sh &
 done
 
-ps -U $USER | grep $script | awk '{print $1}' > $io_dir/pids
+# wait until the pid is on
+sleep 3
+# only grep the first 10 chars
+ps -U $USER | grep ${script:0:10} | awk '{print $1}' > $io_dir/pids

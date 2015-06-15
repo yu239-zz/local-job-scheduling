@@ -1,15 +1,17 @@
 #!/bin/bash
 
+# example: ./check-jobs.sh dtBOW-io 0
+
 (($# < 1)) && echo "usage: ./check-jobs.sh <io-dir> [<worker-id>]" && exit
 
-io_dir=`realpath $1`
+io_dir=$1
 
 if [ ! -d $io_dir ]; then
     echo "directory $io_dir does not exist"
     exit
 fi
 
-if (($# < 2)); then
+if (($# < 2)); then    
     for pid in `cat ${io_dir}/pids`; do
 	if ps -p $pid > /dev/null; then
 	    echo $pid, alive
@@ -27,5 +29,6 @@ n_workers=`ls $io_dir/*.output | wc -l`
 (($worker_id >= $n_workers)) && echo "invalid worker id: only $n_workers workers exist (starts with 0)" && exit
 
 outputs=(`ls $io_dir/*.output`)
-cat ${outputs[$worker_id]}
+echo "==== last 500 lines of the output ===="
+cat ${outputs[$worker_id]} | tail -n 500
 
