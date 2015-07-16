@@ -16,3 +16,4 @@ else
 fi
 
 (($# >= 2)) && [ "$2" == "rm" ] && rm -rf $io_dir
+rm -f nohup.out
