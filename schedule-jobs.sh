@@ -21,12 +21,14 @@ split -l $n_lines_per_batch $files_list $io_dir/
 running_dir=$(dirname "$job_script")
 script=$(basename "$job_script")
 
+device_id=0
 for file in `ls $io_dir/*`; do
     echo "#!/bin/bash" > $file.sh
     # there might be some data dependency on the relative path of script
-    echo "cd $running_dir; nice -n 19 ./$script $file 2>&1 | tee $file.output" >> $file.sh
+    echo "cd $running_dir; nice -n 19 ./$script $file ${device_id} 2>&1 | tee $file.output" >> $file.sh
     chmod 755 $file.sh
     nohup bash $file.sh &
+    device_id=$((device_id+1))
 done
 
 # wait until the pid is on
