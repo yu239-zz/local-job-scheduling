@@ -9,11 +9,14 @@ io_dir=$1
 if [ ! -f ${io_dir}/pids ]; then
     echo "file ${io_dir}/pids does not exist; no jobs to kill"
 else
-    for pid in `cat ${io_dir}/pids`; do
-	echo "kill -9 $pid"
-	kill -9 $pid &>/dev/null
-    done
+    ## don't kill twice so that some other processes might be killed
+    if [ ! -f ${io_dir}/killed ]; then
+	for pid in `cat ${io_dir}/pids`; do
+	    echo "pkill -TERM -P $pid"
+	    pkill -TERM -P $pid &>/dev/null
+	    touch ${io_dir}/killed
+	done
+    fi
 fi
 
-(($# >= 2)) && [ "$2" == "rm" ] && rm -rf $io_dir
-rm -f nohup.out
+(($# >= 2)) && [ "$2" == "rm" ] && echo "rm -rf $io_dir nohup.out" && rm -rf $io_dir nohup.out

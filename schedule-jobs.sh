@@ -22,16 +22,17 @@ running_dir=$(dirname "$job_script")
 script=$(basename "$job_script")
 
 device_id=0
-for file in `ls $io_dir/*`; do
+echo > $io_dir/pids
+for file in `ls $io_dir/* | grep -v pids`; do
     echo "#!/bin/bash" > $file.sh
     # there might be some data dependency on the relative path of script
     echo "cd $running_dir; nice -n 19 ./$script $file ${device_id} 2>&1 | tee $file.output" >> $file.sh
     chmod 755 $file.sh
-    nohup bash $file.sh &
+    nohup $file.sh &>/dev/null &
+    echo $! >> $io_dir/pids
     device_id=$((device_id+1))
 done
 
-# wait until the pid is on
-sleep 3
-# only grep the first 10 chars
-ps -U $USER | grep ${script:0:10} | awk '{print $1}' > $io_dir/pids
+sleep 1
+echo "${n_workers} jobs scheduled; use ./check-jobs.sh to see the progress"
+

@@ -12,12 +12,14 @@ if [ ! -d $io_dir ]; then
 fi
 
 if (($# < 2)); then    
+    worker_id=0
     for pid in `cat ${io_dir}/pids`; do
 	if ps -p $pid > /dev/null; then
-	    echo $pid, alive
+	    echo pid $pid, worker ${worker_id} "=> alive"
 	else
-	    echo $pid, dead
+	    echo pid $pid, worker ${worker_id} "=> dead"
 	fi
+	worker_id=$((worker_id+1))
     done
     exit
 fi
