@@ -19,4 +19,4 @@ else
     fi
 fi
 
-(($# >= 2)) && [ "$2" == "rm" ] && echo "rm -rf $io_dir nohup.out" && rm -rf $io_dir nohup.out
+(($# >= 2)) && [ "$2" == "rm" ] && ./clean-jobs.sh ${io_dir}

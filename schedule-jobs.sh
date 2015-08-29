@@ -10,6 +10,11 @@ rm -rf $4; mkdir -p $4
 job_script=`realpath $1`
 files_list=`realpath $2`
 n_workers=$3
+device_id=0
+
+# when n_workers is negative, use cpu instead of gpu
+(( $n_workers < 0 )) && device_id=$3 && n_workers=$((0-n_workers))
+
 io_dir=`realpath $4`
 
 # compute how to split the job list
@@ -21,7 +26,6 @@ split -l $n_lines_per_batch $files_list $io_dir/
 running_dir=$(dirname "$job_script")
 script=$(basename "$job_script")
 
-device_id=0
 echo > $io_dir/pids
 for file in `ls $io_dir/* | grep -v pids`; do
     echo "#!/bin/bash" > $file.sh
