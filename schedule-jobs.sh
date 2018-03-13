@@ -9,16 +9,20 @@ rm -rf $4; mkdir -p $4
 # get absolute paths
 job_script=`realpath $1`
 files_list=`realpath $2`
+# compute how to split the job list
+files_n=`cat $files_list | wc -l`
+
 n_workers=$3
 device_id=0
 
-# when n_workers is negative, use cpu instead of gpu
-(( $n_workers < 0 )) && device_id=$3 && n_workers=$((0-n_workers))
+(( $n_workers <= 0 )) && (( $files_n > 1 )) && echo "job list should only contain one job" && exit
+
+# when n_workers is nonpositive, there is only one gpu job
+# the gpu id is set by the negative of n_workers
+(( $n_workers <= 0 )) && device_id=$((0-n_workers)) && n_workers=1
 
 io_dir=`realpath $4`
 
-# compute how to split the job list
-files_n=`cat $files_list | wc -l`
 n_lines_per_batch=$(((files_n+n_workers-1)/n_workers)) # rounding up
 
 split -l $n_lines_per_batch $files_list $io_dir/
@@ -39,4 +43,3 @@ done
 
 sleep 1
 echo "${n_workers} jobs scheduled; use ./check-jobs.sh to see the progress"
-
